@@ -1,0 +1,15 @@
+{
+  "name": "wcs_maestro",
+  "version": "1.0.0",
+  "description": "AI Vtuber Collab Orchestration",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "w-AI-fu_DEV",
+  "license": "MIT",
+  "dependencies": {
+    "openai": "^4.49.1",
+    "ws": "^8.17.0"
+  }
+}
