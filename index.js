@@ -26,6 +26,10 @@ const SYS_PROMPT =
     "respond to the last message.\n" +
     "The provided name should never be the same as the person who sent the " +
     "last message.\n" +
+    "If the message is not really destined to anyone, try to pick the name of someone who " +
+    "hasn't spoken yet from the list of known participants.\n" +
+    "If the last message mentions someone in their response, they should be prioritized as " +
+    "the person who should be receiving it.\n" +
     "## Response\n" +
     "Your response should only contain the name of the chosen person and " +
     "nothing else. No other commentary needed.\n";
@@ -67,6 +71,7 @@ function recursiveFetchParticipants() {
             }
         });
     });
+    log(known_participants);
     setTimeout(recursiveFetchParticipants, 15_000);
 }
 
@@ -173,9 +178,15 @@ async function handleIncomingText(sender, content, json) {
         target_user =
             known_participants[randUpTo(known_participants.length)].user;
 
-        while (target_user == json.from) {
+        let tries = 0;
+        while (target_user == json.from && tries < 5) {
+            tries++;
             target_user =
                 known_participants[randUpTo(known_participants.length)].user;
+        }
+
+        if (tries >= 5) {
+            target_user = json.from;
         }
 
         target = target_user;
@@ -189,6 +200,11 @@ async function handleIncomingText(sender, content, json) {
     log("Sending to:", target);
 
     client.sendText(sender, content, [target_user]);
+
+    for (let known_user of known_participants) {
+        if (known_user.user == target_user) continue;
+        client.sendData(sender, content, [known_user.user]);
+    }
 }
 
 /**
@@ -245,11 +261,9 @@ async function decideTarget(json) {
         ...getBacklogAsMessages(),
     ];
 
-    //log("Prompt:", prompt_messages);
-
     let completion_promise = openai_client.chat.completions.create({
         messages: prompt_messages,
-        model: "gpt-3.5-turbo",
+        model: "gpt-4o-mini",
         max_tokens: 100,
         temperature: 1.0,
         stream: false,
@@ -261,7 +275,6 @@ async function decideTarget(json) {
         log("Error while contacting OpenAI.");
         return "";
     }
-
     return completion.choices[0].message.content ?? "";
 }
 

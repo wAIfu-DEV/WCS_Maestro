@@ -4,7 +4,7 @@
   "description": "AI Vtuber Collab Orchestration",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node index.js"
   },
   "author": "w-AI-fu_DEV",
   "license": "MIT",

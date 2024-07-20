@@ -1,1 +1,3 @@
 .env_copy
+.env
+node_modules
